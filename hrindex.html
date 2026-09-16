@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>บันทึกเวลาทำงาน · Cubic HR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --soft:#F3F0DC;        /* cream band */
+  --soft-2:#FAF8F0;
+  --line:#E7E3CE;
+  --mint:#CCE4D2;        /* green band */
+  --mint-deep:#5E9B77;
+  --sand:#E0BE90;        /* tan band */
+  --sand-deep:#B98A4F;
+  --coral:#F87C78;       /* coral band */
+  --blue:#B98A4F;        /* accent (strokes, small text) */
+  --blue-deep:#9A7038;
+  --blue-soft:#EBD9BE;
+  --ink:#5B5648;
+  --ink-strong:#2F3129;
+  --muted:#9E9A88;
+  --green:#F0A868;
+  --amber:#B98A4F;
+  --red:#E06460;
+  --r-lg:22px;
+  --r-md:16px;
+  --shadow:0 2px 6px rgba(94,102,80,.05), 0 14px 34px rgba(94,102,80,.09);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"IBM Plex Sans Thai",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);color:var(--ink);min-height:100dvh;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.screen{display:none;min-height:100dvh;flex-direction:column}
+.screen.on{display:flex}
+.wrap{width:100%;max-width:1140px;margin:0 auto;padding:0 20px}
+
+/* ---------- PIN ---------- */
+#pin{align-items:center;justify-content:center;padding:28px 20px calc(28px + env(safe-area-inset-bottom))}
+.pin-wrap{width:100%;max-width:370px;text-align:center;background:var(--surface);
+  border-radius:26px;padding:34px 26px 30px;box-shadow:var(--shadow)}
+.pin-logo{width:118px;height:auto;display:block;margin:0 auto 10px}
+.board-logo{width:104px;height:auto;flex:none;align-self:center;opacity:.95}
+@media(max-width:560px){.board-logo{width:78px}}
+.pin-date{font-size:13px;color:var(--muted);margin-bottom:26px}
+.pin-title{font-size:26px;font-weight:600;color:var(--ink-strong);margin:0 0 6px;letter-spacing:-.02em}
+.pin-sub{font-size:14px;color:var(--muted);margin:0 0 26px}
+.dots{display:flex;gap:16px;justify-content:center;margin-bottom:12px}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--line);transition:.18s}
+.dot.fill{background:var(--mint-deep);transform:scale(1.08)}
+.pin-msg{min-height:22px;font-size:13px;color:var(--red);margin-bottom:14px}
+.shake{animation:shake .38s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:290px;margin:0 auto}
+.key{height:70px;border-radius:20px;background:var(--soft-2);font-size:26px;color:var(--ink-strong);
+  display:flex;align-items:center;justify-content:center;transition:transform .1s ease, background .15s ease}
+.key:active{transform:scale(.94);background:var(--soft)}
+.key.blank{background:none;pointer-events:none}
+.key.fn{font-size:15px;color:var(--muted);background:none}
+.hint{margin-top:22px;font-size:12px;color:var(--muted)}
+
+/* ---------- Header ---------- */
+.hero{background:linear-gradient(135deg,#FBE4CB 0%,#F5CFA0 100%);color:var(--ink-strong);
+  padding:calc(22px + env(safe-area-inset-top)) 0 64px;border-radius:0 0 30px 30px}
+.hero-in{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.me{display:flex;align-items:center;gap:13px;min-width:0}
+.avatar{width:52px;height:52px;border-radius:50%;background:#FFFFFF;flex:none;color:var(--blue-deep);
+  display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;
+  border:1px solid var(--line)}
+.hello{font-size:12.5px;color:var(--muted)}
+.me-name{font-size:19px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero .clock{text-align:right;flex:none}
+.hero .c-time{font-size:30px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1}
+.hero .c-date{font-size:12.5px;color:var(--muted)}
+
+/* ---------- Summary card ---------- */
+.board{margin-top:-46px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow);
+  padding:20px 22px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.board .head{flex:1 1 240px;min-width:200px}
+.board .d-small{font-size:12.5px;color:var(--muted)}
+.board h2{margin:2px 0 14px;font-size:20px;font-weight:600;color:var(--ink-strong);letter-spacing:-.02em}
+.stamps{display:flex;gap:12px;flex-wrap:wrap}
+.stamp{background:var(--soft-2);border-radius:14px;padding:11px 18px;min-width:120px;text-align:center}
+.stamp .v{font-size:19px;font-weight:600;color:var(--ink-strong);font-variant-numeric:tabular-nums}
+.stamp .v.dim{color:var(--blue-soft)}
+.stamp .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+.ring-box{flex:none;text-align:center}
+.ring{position:relative;width:104px;height:104px;margin:0 auto}
+.ring svg{transform:rotate(-90deg)}
+.ring .bgc{fill:none;stroke:var(--soft);stroke-width:9;opacity:.9}
+.ring .fgc{fill:none;stroke:var(--sand);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .mid b{font-size:23px;font-weight:600;color:var(--ink-strong);font-variant-numeric:tabular-nums;line-height:1}
+.ring .mid span{font-size:11px;color:var(--muted)}
+.ring-box .cap{font-size:12px;color:var(--muted);margin-top:8px}
+.state{display:inline-flex;align-items:center;gap:8px;background:var(--soft-2);border-radius:999px;
+  padding:9px 16px;font-size:13.5px;margin-top:14px;color:var(--ink)}
+.state .pip{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.state.in .pip{background:var(--green);box-shadow:0 0 0 4px rgba(240,168,104,.22)}
+.state.out .pip{background:var(--blue)}
+
+/* ---------- Tiles ---------- */
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:22px}
+@media(max-width:900px){.tiles{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.tiles{grid-template-columns:repeat(2,1fr);gap:12px}}
+.tile{background:var(--surface);border-radius:var(--r-lg);padding:20px 12px 18px;text-align:center;
+  box-shadow:0 2px 10px rgba(94,102,80,.05);transition:transform .12s ease, box-shadow .2s ease}
+.tile:active{transform:scale(.97)}
+.tile:hover{box-shadow:0 8px 22px rgba(94,102,80,.1)}
+.tile .ic{width:50px;height:50px;border-radius:17px;background:var(--soft-2);margin:0 auto 10px;
+  display:flex;align-items:center;justify-content:center}
+.tile .ic svg{width:25px;height:25px;fill:none;stroke:var(--blue);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.tile .th{display:block;font-size:14.5px;font-weight:600;color:var(--ink-strong)}
+.tile .en{display:block;font-size:9.5px;letter-spacing:.14em;color:var(--muted);margin-top:2px}
+.tile .bd{display:inline-block;margin-top:8px;font-size:10.5px;color:var(--blue-deep);background:var(--soft);border-radius:999px;padding:3px 10px}
+.tile.primary{background:linear-gradient(140deg,#FAE1C4,#F5CFA0);box-shadow:0 8px 20px rgba(224,155,80,.24)}
+.tile.primary .ic{background:#FFFFFF}
+.tile.primary .ic svg{stroke:var(--mint-deep)}
+.tile.primary .th{color:var(--ink-strong)}
+.tile.primary .en{color:var(--muted)}
+.tile.primary .bd{background:#FFFFFF;color:var(--mint-deep)}
+.tile[disabled]{opacity:.42;pointer-events:none}
+.pending{margin-top:16px;font-size:13px;color:var(--red);text-align:center;display:none}
+.pending.on{display:block}
+.foot{margin:18px 0 calc(28px + env(safe-area-inset-bottom));text-align:center}
+.link{font-size:13.5px;color:var(--muted);text-decoration:underline;text-underline-offset:4px;padding:8px}
+
+/* ---------- Report ---------- */
+#report{background:var(--bg);padding-bottom:calc(30px + env(safe-area-inset-bottom))}
+.rep-head{padding:calc(20px + env(safe-area-inset-top)) 0 14px;display:flex;align-items:center;gap:12px}
+.back{font-size:15px;color:var(--blue);padding:6px 4px;font-weight:500}
+.rep-title{font-size:19px;font-weight:600;color:var(--ink-strong);margin:0;letter-spacing:-.01em}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--soft);border-radius:14px;padding:4px;margin-bottom:14px}
+.seg button{padding:9px 4px;font-size:13.5px;border-radius:11px;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--ink-strong);font-weight:600;box-shadow:0 1px 3px rgba(94,102,80,.12)}
+.month-nav{display:flex;align-items:center;justify-content:space-between;background:var(--surface);
+  border-radius:var(--r-md);padding:8px 10px;margin-bottom:14px;box-shadow:0 2px 8px rgba(94,102,80,.05)}
+.month-nav button{width:44px;height:40px;font-size:20px;color:var(--blue);border-radius:12px}
+.month-nav button:active{background:var(--soft-2)}
+.month-nav .m{font-size:16px;font-weight:600;color:var(--ink-strong)}
+.sum{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+@media(min-width:760px){.sum{grid-template-columns:repeat(4,1fr)}}
+.sum .cell{background:var(--surface);border-radius:var(--r-md);padding:15px 17px;box-shadow:0 2px 8px rgba(94,102,80,.05)}
+.sum .cell .lbl{font-size:11.5px;color:var(--muted)}
+.sum .cell .val{font-size:24px;font-weight:600;color:var(--ink-strong);font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.25}
+.sum .cell .val small{font-size:13px;font-weight:500;color:var(--muted);margin-left:3px}
+.rows{border-radius:var(--r-md);overflow:hidden;background:var(--surface);box-shadow:0 2px 8px rgba(94,102,80,.05)}
+.row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row.holiday{background:var(--soft)}
+.row .dnum{width:44px;flex:none;text-align:center}
+.row .dnum b{display:block;font-size:18px;font-weight:600;color:var(--ink-strong);font-variant-numeric:tabular-nums;line-height:1.1}
+.row .dnum span{font-size:11px;color:var(--muted)}
+.row .times{flex:1;font-size:14.5px;color:var(--ink-strong);font-variant-numeric:tabular-nums}
+.row .sub{font-size:12px;color:var(--muted);margin-top:1px}
+.row .hrs{font-size:14.5px;font-weight:600;color:var(--blue-deep);font-variant-numeric:tabular-nums;flex:none;text-align:right}
+.tag{display:inline-block;font-size:11px;padding:1px 9px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.tag.late{background:#FDEBEA;color:var(--red)}
+.tag.miss,.tag.wait{background:#F6EEDF;color:var(--amber)}
+.tag.ok{background:#E4F0E7;color:var(--green)}
+.tag.no{background:#FDEBEA;color:var(--red)}
+.spin.dark{border-color:rgba(94,102,80,.25);border-top-color:var(--mint-deep);margin-right:8px}
+.cap-wrap{position:relative;width:100%;aspect-ratio:4/3;border-radius:18px;overflow:hidden;
+  background:var(--soft);margin-bottom:12px}
+.cap-wrap video,.cap-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.cap-wrap video{transform:scaleX(-1)}
+.cap-wrap img{display:none}
+.cap-wrap.shot video{display:none}
+.cap-wrap.shot img{display:block}
+.cap-wrap.nocam video{display:none}
+.cap-wrap.nocam::after{content:"แตะปุ่มด้านล่างเพื่อเปิดกล้อง";position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px}
+.cap-time{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.45);color:#fff;
+  padding:4px 10px;border-radius:999px;font-size:13px;font-variant-numeric:tabular-nums}
+.gps-row{display:flex;align-items:center;gap:8px;justify-content:center;text-align:left;
+  background:var(--soft-2);border-radius:13px;padding:11px 14px;font-size:13px;color:var(--ink);margin-bottom:6px}
+.gps-row .gdot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--muted)}
+.gps-row.ok .gdot{background:var(--green);box-shadow:0 0 0 4px rgba(240,168,104,.22)}
+.gps-row.warn .gdot{background:var(--sand-deep)}
+.gps-row.bad{color:var(--red)}
+.gps-row.bad .gdot{background:var(--red)}
+.tag.queued{background:#FDEBEA;color:var(--red)}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:14.5px}
+
+/* ---------- Sheet ---------- */
+.sheet-bg{position:fixed;inset:0;background:rgba(47,49,41,.3);backdrop-filter:blur(3px);
+  display:flex;align-items:flex-end;justify-content:center;z-index:50;opacity:0;pointer-events:none;transition:opacity .22s}
+.sheet-bg.on{opacity:1;pointer-events:auto}
+.sheet{background:var(--bg);width:100%;max-width:520px;border-radius:26px 26px 0 0;
+  padding:26px 22px calc(26px + env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);text-align:center;
+  max-height:92dvh;overflow-y:auto}
+@media(min-width:640px){.sheet-bg{align-items:center}
+  .sheet{border-radius:26px;max-width:480px;transform:translateY(24px) scale(.98)}
+  .sheet-bg.on .sheet{transform:translateY(0) scale(1)}}
+.sheet-bg.on .sheet{transform:translateY(0)}
+.sheet h3{margin:0 0 4px;font-size:21px;font-weight:600;color:var(--ink-strong);letter-spacing:-.01em}
+.sheet p{margin:0 0 18px;font-size:14.5px;color:var(--muted)}
+.sheet .time-lg{font-size:44px;font-weight:600;color:var(--blue);font-variant-numeric:tabular-nums;margin:8px 0 4px;letter-spacing:-.03em}
+.form{text-align:left;margin-bottom:6px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:var(--surface);border:1px solid var(--line);
+  border-radius:13px;padding:13px 14px;font-size:16px;font-family:inherit;color:var(--ink-strong);outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue)}
+.field textarea{min-height:72px;resize:vertical}
+.field.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:11px 8px;font-size:14.5px;color:var(--ink)}
+.chip.on{background:var(--ink-strong);border-color:var(--ink-strong);color:#FFFDF8;font-weight:500}
+.calc{background:var(--soft);border-radius:13px;padding:12px 14px;font-size:14.5px;color:var(--ink-strong);text-align:center;margin:4px 0 6px}
+.calc b{color:var(--blue);font-size:19px;font-variant-numeric:tabular-nums}
+.err{color:var(--red);font-size:13px;min-height:20px;text-align:center}
+.btn{display:block;width:100%;border-radius:999px;padding:15px;font-size:16.5px;font-weight:500;margin-top:10px}
+.btn-primary{background:var(--ink-strong);color:#FFFDF8;box-shadow:0 8px 20px rgba(54,48,38,.18)}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn[disabled]{opacity:.55;pointer-events:none}
+.check{width:74px;height:74px;margin:6px auto 14px}
+.check circle,.check path{fill:none;stroke:var(--green);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.check circle{stroke-dasharray:210;stroke-dashoffset:210;animation:draw .5s ease forwards}
+.check path{stroke-dasharray:50;stroke-dashoffset:50;animation:draw .35s .35s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translate(-50%,20px);
+  background:var(--ink-strong);color:#fff;padding:12px 20px;border-radius:999px;font-size:13.5px;
+  opacity:0;transition:.25s;z-index:60;max-width:90%;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+  border-radius:50%;display:inline-block;vertical-align:-3px;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ===== PIN ===== -->
+<section id="pin" class="screen on">
+  <div class="pin-wrap">
+    <img class="pin-logo" src="data:image/png;base64,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" alt="Cubic HR System">
+    <div class="pin-date" id="pinDate">—</div>
+    <h1 class="pin-title">ใส่รหัสพนักงาน</h1>
+    <p class="pin-sub">ใส่ครั้งเดียว เครื่องนี้จะจำไว้ให้</p>
+    <div class="dots" id="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <div class="pin-msg" id="pinMsg"></div>
+    <div class="keypad" id="keypad">
+      <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
+      <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
+      <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
+      <button class="key blank"></button><button class="key" data-k="0">0</button><button class="key fn" data-k="del">ลบ</button>
+    </div>
+    <p class="hint">ลืมรหัส? ติดต่อฝ่ายบุคคล</p>
+  </div>
+</section>
+
+<!-- ===== Home ===== -->
+<section id="home" class="screen">
+  <div class="hero">
+    <div class="wrap hero-in">
+      <div class="me">
+        <div class="avatar" id="avatar">–</div>
+        <div>
+          <div class="hello">สวัสดี</div>
+          <div class="me-name" id="whoName">—</div>
+        </div>
+      </div>
+      <div class="clock">
+        <div class="c-time" id="clockTime">--:--:--</div>
+        <div class="c-date" id="clockDate">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="board">
+      <div class="head">
+        <div class="d-small" id="boardDate">—</div>
+        <h2>เวลาสแกนวันนี้</h2>
+        <div class="stamps">
+          <div class="stamp"><div class="v dim" id="tIn">--:--</div><div class="l">เวลาเข้า</div></div>
+          <div class="stamp"><div class="v dim" id="tOut">--:--</div><div class="l">เวลาออก</div></div>
+        </div>
+        <div class="state" id="stateBar"><span class="pip"></span><span id="stateText">ยังไม่ได้บันทึกเวลาวันนี้</span></div>
+      </div>
+      <div class="ring-box">
+        <div class="ring">
+          <svg width="104" height="104" viewBox="0 0 104 104">
+            <circle class="bgc" cx="52" cy="52" r="45"></circle>
+            <circle class="fgc" id="ringFg" cx="52" cy="52" r="45" stroke-dasharray="283" stroke-dashoffset="283"></circle>
+          </svg>
+          <div class="mid"><b id="ringVal">0.0</b><span>ชม.</span></div>
+        </div>
+        <div class="cap">รวมเวลางาน</div>
+      </div>
+      <img class="board-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMMAAAEECAMAAACiO3AgAAABgFBMVEUpIxE1LSLiqVjq4tRgEQ3RqVA5MifOpUymoZnk0pz27HHt5LSPgnG6pTdDOi3/f39EOy9TTi3EmT3t3sXVrVTJlza0jDj/AAC5pWLt3sbFmDr6tLQ8NClNRDXkwW3nx2a4uLhMQjXt3cb/fwVnWVGvcmHkxGzFmTyocRvMvbK6jjm8lUS9lEGLd0zo2b0AAP8A/wD/AP9GPkB2YUJWTUB//3+6rpkAAAD+++9hV0ju49BeVEZ7cmnr3cbNplFPRjrpyW/EnEZVTELn1bbas1m8l0X3yrY9PT2Eem/VtXD//wBVVQC6kzz///90bGXw0nQtJhpUVFRDOy7bxJOqqlVFPDJ/fwDLrGpsY1lMQzbNpEt/f39MQzZDOy/Vu4a+fz4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADUE20+AAAAYHRSTlMdWxb0C1+bo/7+ChT+EGICzA/8Y9wc/gEPnl0D7mVX7AOVLAISBaqRBv5qo2H9WwEBAfu11wJsAP7+/v7+/fz4/P39/v7+/gT+/QED/gH+/jEDrv4D+QL+/tHRArWO/gR0QcpdAAAfyUlEQVR42u2dCV/iWLbAQ0A2ZdHS0irLtqq7qrp7eubNzNtCEpNIABEEZFEQAf3+3+Kdc5fkJoRAAGt6fo87PZayhPvP2c+9CZKyhdF8hR+5vVTq2YTxnEp9/HhCnpBfH5rKmw9p80MUZEWZyDD/atUko4q/PKf2ZALy8Fpo/skZHoZwuvcAwDTLZcpgHiHI8bGH4/RPyyDDKZZTKIGy2bjRSmRoRuWlAUgoEcIhk5fKwz8hQxPn9jGFIjAblZJvaBUPxwmxG7n5p2JAQz4kSlQ2B1opcGiVgctB7bywfTOXNjBkee8YJnc0qpTCBuEwuTxy+Obs6/Bfz5DNcTM4aoQTePSqelw1mXmcblEc6zA8/KIoJ79SM9BKqw7Cgf4K1YqI42FL1hGZ4ZS7ohAzWMpB1OqBWEfhhzO4rggISmsNLdMgZo4YxMpzDz+S4RQIssQVHZk3pQ1GZTAqH6E4GMZm0pCiEUBERkM2K6VNB6pVmWjVHmpnMzf5AQxAcEIJRpsTMHFQ6wCtQmlkC2/MADp7RgkaWmmLQxswG0elKkzekKEJ0iYE5nYJmJFTjJRMTtUbMTwwgjIjiG8dg0jDBJWS34hBVnIkseMy0CoVQ9u2PLQXpNhbB0JaRQrysysDNEU6DG278og3wN2uAyGtgHBigv8wxHNmVN6Eo1JGiIetM0wAoVpuzIn+TTiMo6p5cvrLthma8nNjHsEnDuDYDkSmfJyKLIhlDK/KHlhziCkaHMTYCgf4J1n5n+0yNHPH1aMlcdmVx2aeCU/CTbmaUnJbZZCVj6Y5WuHzKYe2CYGhgd/QoMB4aLtn8ER+2JThQUlVy5WVZ7E+AQhBI4JooDIxq246ScIGDKckNGw/vQgkoAwDs/pReWUIuT0oXTnLmgwFRTbDLHqrBDgwRkCIeGUffnl/fX+dkgtyLkylwhly6JVe3pbAcAmQQUOjJhMu3B3fX8O4Ty1RKWmJZ01VzcoPkgFjMIFhSExx75qO+9TeHqrUZC2GITIYP0gGaBAYIarP+2gBOYeBjtSZ0l7LL7Xf0KTjPhlQOSCDjAwPPob757NJc1WGppArvaFJBxBQBtM8wzkMlVzDA3HNbH05A5iOo3e/QL73RgyBBJyByEFpv1KbdrVJya4qh69ClAa31HgbW9YWM1BdAoNI3a8jh2ZTTl06KXxO+Xi8bitsLQRmD9R2s4rsQWicLfBMPoYzZe/+/jiR5a7116qZeQMGYzED+NZnZpKF30Rlul9YHUlkhaYgaA8Ay+wgv2C2ZPxAMfD4QM/hCZxQh2ChNThykB0GmSiezFKN42pZ+7EMRrnBq6B2Uz7mBMd7C0McYdj7SVayLEdUzhrIcEYzviyEhx+pSjRfciq5LLHqe5DBnrJQCsBALABmrVB92ldS19ffKcPwrVxrGMONk/NBfAJB3F9/xzwjrEAFhu/ICpFcdgyCnYhffjSDL/fGIIs6AjIILYSkQlO+RohLmZz8fzRPLjPfKQNEe/MtwkM8TA4vZlWIA6jhhWx7Wf3QVOTvDCJLs/bvWZpdkcx78MNitFDHubr/IE9WqUXhDXssDmZ91QOEuMwPZgDtPVGGkXsCE1oxIUSBLNtmlxXTaVXXO+mtM2iakC5F7WvklLMUSkJWxHWMLDIEhIf406Nl29anq22HByOOZdxze70eGdiw/P36WG7/UyweFoQ41VJ129btdSHCGAwhPETtL52C/mT9QsSmxnwvNf1JtQHBetI/pbccpuOeEBe9RzbnwYYLKqAnC6VgXZXi1tPWGQbl6qIUe6W+xkPb15gJDHEaItj6Y7qk2Za27TDtDQ+rMkxyOGTZA/Dw+lp4QDnMh7j4IzKgIHTLMrYdpiE8RF6BkCZC9exoETGLk0lgFccYAMLStysHg7vWSVQ5yHt0uAZNdrdhovVRDNOkDYH/gkfC/9m6bulbTTUchog7gyTIlu5ppZFlMhxCsMC175QsVKLxGzrgY64sKgh7mV/S0umrq6vbdHz1MK2R7lLU+HDMK6VLVvkMh7lnvn7vVKIc4ebGQGViFhEqhkzHeny0cDymV2coV1MhlUI4w/fvP8nNU6c/aT6n6BZJlmoYNwJE+tHSYTzaYetwV5/gRTbB8MXCMAYSHqKujEpyKrXHdj6ydn2O6JFygii8yScwgDrF1UcYV2EIHSKsp4N0+uCqE18xTGulTLn6l6iu1YkPbfmsyVejQQr7cDK+PZtmOYAB/Wk8nQ51qySW6/ZBJmKq8VI296IzZOWznCzsrZOx8ElBDZfDEOekSx45zGWxcw/FPxF9sz49PvlNOjTEkeqhoKwfpwWG09fT5oMiNIxdo57bfKXBROcdaFoFWwD/az/axuoMoL25qK51noHoUmoCbrb9kBKb3sYChFIJTJervCZoj5FOqzaIw++BQxg00zw+U5qbMjTBpqvPivJNPvOVD3HDCF6Djlu2ZR1k4kY8bX2yfeI4UP3uK9S1mseRVSmgZywruAv1Gcbxs7lahyyu00CA2YcabMXxlcJ0ZZ3wEKRLr88mvQyA/FhtJSutWwTjUZ93uJrXFYSFh8E6rnWO4UHJgSWT3f9kp7Z5NFoxC4LE4jYdkHw4bjm+nAFc6+YMBbQG3ACtkb1WL6Y5Ko9KmwztxufR+Fq0YcxXQCN0S982Yyg0T3D7ras/WqNsHm20MOqPjpTBCAIplcpmObpr9TNgruS148aG7UqR4YYzwH+ZdDrj4yBuKaucbsTwoPzF9J92OO7RJu37uJ8B95Zo6AMgdFylfwcV4mIpGUfruFY/Q2q+cgPT3qjnavzu1SWC8AmLKBs9md2B1ItwgFs6Mv9YY3uo5OknQco6d9JHW7MImnPAOf8dM0L1SVUJCKQkwBHHhkDL/Mvkt40YSJ97Tvk1cLEbLgYZqFA8xAODbtn67QGM26snlQkEOUxsCChKvbc+Q27BUu6m2uSvptOPun17e4V16q3I8Wipf7s4PCRzqSfWZUgF9uq1jQXhreKuLCiOEOGq06EghINUuJA/Ti++IkdiLQasQstB1zU0zPLN9hjiFheDO5DjtkMEgizAcbiBHDKBOza3t1edqJJ6cDU3brlioTRU3ZqtyfBr8LpPBRkq2pYYnmy7E8DgCuTqiWhVX1pLlxZsz0CGuLGdjbha5nFelfwYB7cd3dbzSm8N3/oxOLEYQAI7oFnB5gzpR1s9CEEghg4cqj0+jC6HiZIL9kAjzMNHFdzEuvFFAwboydVtOAOO21vbSqwmCMlbhx43AmIy+FYsJcqNCpHFZhhg0fqBON0FHMgQW4OBGHUjyLU2bsogIofCWH+v/a0THGCo8ThM9+npyoeCcuhY1uEaDA+YMM0rU7kMj2kvKIryaGBQjDW1CrvmrkU/leJPV09GWgUcIPHIAaLE17XquN5xtTznXSs0OGiNI8A4AploXBrROTzB4SldSquddCljpbGT8ySI4erWtmdr+KWlVwpAVQeFdrnlwYjEgcHBtWg1U0o/6ZnSgQ61A64ZC2JQ0aQnazA0SX8yZHuDNjBbqFIts3FjcIzK6hwZCyzaYegQ7SqV1NtSRr+Kl5gkOlcoBr2/6nqQNNeprC5J8CDJR/MuM9twxLEKh5YWLRpUKY7d2IwNOmXbDgOKAeSVV+prMTQLvx2bEJSXQTRGLYJhvlQEjsoSf2UYkAy5Fq2iOeD8seeciQu6dAUWPT5cqxbldVA5/MLoEUZC7YUIo9Uqj14qrjDCFMswfrfAol2vFC918MfTbSkO6OBmuY7dXkUQQ1CfD1sblVDFAGVqaY5x1N6XBfvWyBVChjZ3AAjyGgQHId3r3KY7qE8oCssodQQxEItev2f8QK7oWwmClkejQQVnTaVwU6loDojQPCICMmxvutdB600fqEYpradLaYEBLbq3NgOunpCFOFyWCYOoEQijZdYM0haGWWqj1hHe7KTxkqnwqRsVzhdcOXSewAmlSahwGMCiLWkTBrqKgpIIqxhM3nYatJhICMjLqMycFpIMKoann9qxgtM9okXpdEcQw3iiKBswQKTDHLycQQ1eDgGz9nRkGwCB4mBj1GgMBqBhlRfNGxz8w801bjtRLHrB9Q+/gCTIVa5aSOGDNkE6RjWzJRSwL/DnyKgMyI0PUCQ1HOUahMW/2UJwCCuCIFWKUE4vuIbjlWxdMs0bf8kgWjpCYKJeAZNw0/RW+T27gEgb1cD31kyKAdqlLyngXMeqzyKIYdF1KK9KDpenhWTboP9WfBCYlzRqvP9Ugbm2WAGSwd9rDXhf5Wbw0hiNDmxdXUkMxLHebX6dIl66zm7oo7GLECmDWCKNwJ7xpANL4+VlMAD7rlF3VTLM97Xa+1FFc6KG0FYKLeGoY93KtZbNgnKSMsltYgZuPqG9vK94047WqIK+CLSl1QIEk6kRITCcizDhrUFtJX8dTRqYT/8ZyaJDr2mS8S4CJr0/VwNcCzIMzCNPVgtnHhTGHeUaPB1/oTJwjQh1cEFbSbCDGt4FrFo1D4rRmt9hPZzhL0CRMqsN9z5d4FC9TTSjBjK4vr/P4AaiS3BGNe2l1qq9r1X8S6OqFdILuO10alXyMeQ2LmeRIKQll7zijUHI7dL4DdP8PQMNzv19JnN/DT8ymWrNBIJWbRC0/WxxcLjt3JJb2DQymQHxybkoSynLemkPiCEDR+romHY3/H2PQQsYLkF7ypeZDLioQAIoQkMsGhCEZeQKkURzuDUG0Ch+Q5t9+SS3Vy37G7IvNWC4b0AUaCCDWQveIW6HWHTnyrM8gDseUhGWeFfqaTYLr68Fsu/y4xxDDVzTdYYPZBhpi9pKCxlMb0uoYlafv66+thjhvj/N5uvwo7+pDN4VvBa79Oj+3gQn1aoFJLwda3GjuHNw7GtEmN4LCLbHQJJBPwPkE1iCxeNaJlOpZBoNeOB9JXBj722IGHyewox0s5BIDPL8hSlgxP5uVKtVCW8rzY25ftAo0m7jSAxk9/TILwfuPMMY1JBGcedgbtWD6NLDmzA053eAcwYIENeZhQyhwQGiW9m/rl81I2zFisgg+y+YG9EMKXN5f39/eb+I4SAs3QMGnzkMytXnrcYH/34ObweNMsRxszJkG5lghnhYcAiQQzna5vtoDPNXCAUyZCJZ9Jw9NCBc5JrNN2IgzvVlkS7dX2rBDGHBgfmluFiQV82/Rkn6ospB9jkmxlCqXF9eUqOeZ9CWVA6gTO5ByZ2kou2XjsbwD+XEt2LHGdxSu1LzMyyrHEiuQTM+emOy1Pbqh4CBy/AeJ8IZ4s7eyUrLn/WlLV0NX0W8JTcuHI1omfKr0jx9QwZiEI0AeyDpUkZbxKDfLlkK5Td0xjv1KYV1rvGL4Fx912pRhgz1S/eXGdLbGPh1SbVV3MsQ4l87B6SOM3/9+G3r98GaqyaGzx7vShkYAgxiD77Wf5xsh7FV7KwuArkFzP/ay+UU5Q3uqTanTHtV0TONWqajStckQIAu+ZcvfsfrOei1K4tAbp90O4br/K/R70sbjeG0fXYme2pqyoAmTWog6lvnlmDwog+LXLxig0CCJHKr69ahnFvrPscrM7TP2/v0EjrPpg7G4M29A5aR4ukr1cb91HR/Ev6rUhDeJtbHSltR3oqh2f7MrpX6bX//P959EIvfEViwd70lQJecLTPpdEe1Hsk+K65aTwQEEFbeJhOdobl/TjsC++8+fIiTbaiDI7dTNnhv1lqtGvaFsEsPtdxLbSEDGZn030D3Xd2iO650tXinKG/C0EaAc5g+3/FPGpYjoVU2wjaf0OprYS0ayBCv0KZzBYDfH6Svnohu6XRYj1/PJ2/BcAoK+o3P3xAWouGsO5IwBgOoonFtkUG8HwSu5Wkc4f1B7aBGjvh7GletQCSPj53/xTPW3joDHHH/Xdwzfd7Gx6al24NxVt4yg8ELrvQuRDA0CIG19zWnHa4ZYCQHuPU7/m5fWc+qpTCEb+8CAOinQ3pTFv1P3Hf3Hp8a8R1DGmkn1wxxdwHTUfjx7nwtiMUMp9n9D/FAAtrEb4Eoai+rXHysGUwGYAqkIx58YgwtHt9vT7bJcK68ixuLh1YZ4QJ7a8nN1uMaW7uG03xDViVqGc1ZVZo76Adlf5sM++EMBs6phQu5ZCtQoCflyyfk1xeYPllY0UKOuWWGdns/7OOobjSAADiOauVRw12N9iq7Ucm8jGrviQxGFS30gPvruKYQm54o+x+0ZRR4zVCZ7qGBIAGBboTrcvRaAXRS4HVxlYv43NpLJeR4cKwP+1u2aXITl3cfNC2cAzFuGiNcdiAkbsBr4eAxo2YuAzA+vIFvhYrHiRBLOQDkpeHEOR6yKUV59HJjLD4EOfwHEh3ab5FrnONRfalGyEw0Eude3DHg+2i0he8x4h8+vPuZf9ab5HxZemhIWD98EC6TDCXxXrq38EVGPA6zpzll+/P6X5+wSu494ZUDJq+Qe8fj/ms+jSXDdz1iHE/9u/195kfb+2uLIFIN1IYawv0g+Pif38H4gDzx+CIRuHDkZTjxdz//vP9zW/Df5+1TZcMRrRZtt8/P9z/7TW+fjJ8JlWf8jIM+6TvO5304THZL30yz3nfrtAvtz+1znEd7RV+CL9yHd7RXfsdWGBKrE2WzWVC2c5jh58+fz8/hv/PPOGdkhOcm7Tf95rIghuGdcIVavX73dp/ePH0bBokJQUpI/EkpOkZ9uaKSb857eJUnbyGHRGzWH7OL68f9fBdfE51CkpYtjCnKb/Ra6VxziwzwlxQrQqGuukO3xsnIli8lp+NxP5YIW8r4tvdsPqd+/SgntisHKUnnrzuDcFjFmLJ696enJCzKX5QSC3ueJ8/HuBvnGL9ax7k7/KYM8GsMCXTdQ0B/2v1uhINaXIjJBUoos02P9NsXr9e4mUMgw50iFXUCwCno9Mn/URaxlQ8ZY7qoqwt2bReUv7INaib5t5xTmltguAMheGWgCzxkRrPVQkZdmTnGZB0GXYiRJTuZXQTT/Bj9bg7zDJKStFVXBEEoqh5byT3VlaTLEHQ9TFP5zZECA0kpDxszSCgF/7xVx7opnWp1V5GEh0EKuE1DU5FNcqPohkuyiTLxiOZDUB1jVl3poCCkKAx6MANkice44oKr8lwQe1G/QGSOoSl5EDAoTGcX+Xw+OSWeiksjH41hgRzAkf5RZdu2XGV63VSXkh4Euxhz5goxj+gROasrGQRn0BfK4RXcEtt5xv3rxw0MguYRMVsVhEC9aL3e69VJ2oMOi7jX1a72Wi6HgpIrM4YGZfirUtjMpptKUUQoSsqpEJPrbUXqWyTMsaibuLsLXjcbLmAYwvsSnrfIz/zu40QKf/g0aajc4VidoY4xyUX4pPg3W8OfsS/TmSfGLUia7wIYJG8yS5I8JXXtGES1mhoK39I5FE1O6q3GMPGIAT41lH+IJhKTgvJUlqlSBmZBEp7+Oj6XSDiSIlew0dsz3lfRnt0vp6Cf3ZVi+Vi3m6DZ1yq6JDilRRkFaA8XbbeIt+7ypk9DJdHHTB1TQ85A/BlEFGlWZHl8P9blU2oqZ3upS3KbSfOPRGHoOUNFiy+fjpN4tnpLGSRBldBs62EvT1ADn7NWqcgeBc+FDDx5t/J9S0zjHXQ88Ql5L5U6/sPdFg3nPSa+nrxlJi2XQ09wrDizJa9/ZLFCTbo77hJKnwd0OECCMlB/bDmxhUZMR87ZnBxwPpOWkBrwxD+2XJcSY5ehH55M9BwxiLgJoo0sJMQUKgcWVIQc2HHQrlQP8/lEQM6u8ySBvS25lME1B1WNhatSnabVupehruTdwg/TkSSfv5P1Ogzou3lqFCMF75e6J3H2ZGmOzEP9DPgNgcFechcCysC0QvI8yk66OmMMfAqqN4XE1/Wxx3DniLQoUWF2LceMVG/WuUTFwQFfOEF6qTnUxfImiEEFhkNm07x+cmav89OcRI11iz169Q9Ymjt/F5ich/CEWSKK4DAkwu0hhIE/zBmIHKjy6HSLieq+tQvvkWzOgJe3DoXASJ2BZTumsUwOXobDFeTAFHxeDrqoS/yUqnoRw0KCOU2dzbouyGFKDmE7wgM9ncViiZjrZ8OvNUMGW5TDSrrk1TtXl1QvA3mZ09iJufoOgvAy3ClFVwq244ekmbVCPwLsgTGwQm0VBl0P0CUmCsem6SM6zAdTxWFPEiGSXgbJ8c54dHiyftfr3WGyJOVns6Xx4U70S8sqZpitytXcLwdmv8weuFiK9d7ELdmdU10cehjIcV3zqAsBacXc21K5E4fzU1+BQVf1IDkQDscvUefqCTgY5B2r9jIIqa5XF+rLm9aS8vf62PHj4KtPV4sPAXLwMrAg0hWyqh5JSbij8djD16KjStG3xPnyJTtcmaRl8YEz8PM9ljxnIC+82fWtUyE4qOqXyP1pf95aDK36Ja41y+TA6+mx792LGJRHRw5fIl3v6vQEhPphQfvlrucyUEUXGOijrAfF5UCtHJz1qfBZeSF58OiSJDJElwO8JcmTLNq7qC+JcVTX3YLPcTi66vFL/iSB2EOgTWOj3LGH+hr3labZlljJ9TxnIgF/xWbFIkQafsaJZTo+rIfFLA8JYr7kc3RDxfVLh0KiPYVnPjn2YHtPInx4u7dKfykpFB605uDLV3d4vC4N+vgEjUXkv0elKbl9TtXJNQ7dOo4qjVsDOq8qKgt9Kz7HIRIR7oMlCgJjvcckukmL1SSPElVcJ5jQICQVqXMWcw0nU/0EM4Goe1f/pxOn9bk47eQwbjJep72tbnJsjWPh99aVWPmhe5Z+4G0Yab4pElboLHcjJRLzmzRWJ7tk9a7oJBpifGCketGXL7Fc2msPYq6BAmfvYQqgJ1fq3SdV72oD5L5jGBZfGFJZqcpDAcsvx/3+2HKTfo9v5W1nq5iPxWKzse3OsujJvaeKJ9kgDmPcn836luUy362w/lB05iEWIap3TaivDDEaedriPG6z93G/5AiLENs2/5skpujAPQwJwbuKn84fC701maP53Ud10QKK6LISLOsT6zRxpcWRg5NBiUsAbIJJ76LdlFfT4lqBI1xy1GlYp1dyXFi36Ifw/4liAEEUnYzO+VAPg5N7u1HHs6qBriHhZxCLEGY2zokgcqivIIeeIvX1QFE4Kyh9p4PikbbTg5jzS06OK2gdIHR9i6d9xXEsnvaYumpPQAwmMW5DqmdtlJ5BK+n0VCy30ufdC0cmeRq2dbGm1912AEllJT9Dz21eeTnoB1n50DLfC9gV+myijsBh+k4WDWo3dopl/vSUmTScsTp1lLTIGKuCX0OSPk9RJB4YVZ6i1UGf9TlvAdlHNzyFknyd9+7Mt1GA9UljwpaNnrOdgJ9aCBRJ8gArhZO605RNiv1TG5vKCa46tthf4qowtn1yGMeW7RbxKdoE+859ccOGzvrVzYRnZxN5FbkmxirOuvjGWL847vOIGiPfhlLsKnwDiI4Bp++tjGG+8LB/MwhEEtLJ4Z8tKcvugC/Nd7bhwW4sOcMQN54l6baZ4d38Wgm86iKfl7rK/Ic0YeYX+S6viPGVMfJCUa8n+HhXmj+w0o3lZ7NZMkmflVbLl+YP48GqL9qgxH5N0CUK4b2JwFf6VqcSgR935/m04d2qOd8cBi/E78Iq8jt4tne3wGPAcwkhfYfXBbwwEbzmloA3k3GnrJ63/nuPHcOOYcfw/4yB9TiYo+zh8Lm8nhMDeuwfWq9gs3jIfu0RV8n+qJOtIIr4Fv6eHyiH4b+VHKR+8hBCaZ6mOlKyP51Ov3jeJEF+M05Kpz3lELIDCL6J2TSPT+Snlj29QDldTL986ffhRw8SjEQfxzRJOltw+EST/NuXtsHQxC3xk8mkUChMJrzDKNlWHTTlyxNN8q0n/FpR28nnh9ihg0eeikBan0KiitU9ScBnkLZadP0wz/sMeAN7yeKdPlr2JHEORczAuYo2YRKTNhuRGNr+tI0xjKXh194FLVQky06n05BsSgwCm1sgFml8gSnv1zHMqGuRRQeY6oUi5Yv4eyJ/kbftfCyGy31dfYxL6zG+YwdvIwC8utPVbG4gh0nWHXLdWbonresLJgfdwjt3Wark5HNJdSo08mw1Nn0i/UlgEDNtSbfZa4BBbDZj2dSFWsllUL7JWZlNA7+s8nRVBvwq8GthHJ9Rw5UsHSxgOmYFo22l43g9veQYN9SP1vhLzCGCP6W2QjdtWP08feFhr2tbXeqDurYORjVOMoZpX+2P1VifM2QVWZzHdeqhuSrDubKHOx2dtzbYfdmAgezbYQyo/BaeYbdVku9butuJK/JlmAnaOt8wAuWrzdeogIF86ShbkPjStXDtp68y9ZTZl8M7J/OwGUGX5J/Y2PuJfNsu1yXcQPWFM+jjMV/Yd48RS6JJ9qiRTt12Vjc2xUYMY+BbafWxVJcOvzKGKfqAhDJVXV1yJgLz2Fvhnl4ug0/tTh2GQzD3C85gJ8AAxRWq/AX+ZEaQIAxERl8vutSt4fkVGXz2MFWUPrhikWEDm37IZs/2s9l9YkoFxxatQ+XQsWlizeOnGY9yib8X1f+e5adstwrKgWy+7Cl5VZ/mZ+On4t2EyEG32dYSSdenYzCxC4zReZWIrQcMksPwAJ/PLFqWm1uIcY/WV2Rg9wx/tMhmIWdb1JDsucTKnnsmouj4xjyJA2Oy3Qw7kRarpyXy3ZG2BQoJDBZZjZ4on6ytyCFwHHa7nxWyq5D+JR2SGt+z9zGWd/+G17sdivyF88dhosv2gqB5daUufUuiyybe7R6+Wa6xfCxq5r7h5VxbYfBKvbfgS8Y8DQWhd5Agw3ekofIvlMOuBtox7Bh2DDuGHcOOYcewY9gx7Bh2DDuGHcOOYcewY9gx7Bh2DDuGHcOOYcewY9gx7Bh2DDuGHcOOYcewY4gy/g+7hLpensoOnQAAAABJRU5ErkJggg==" alt="Cubic HR System">
+    </div>
+
+    <div class="tiles">
+      <button class="tile primary" id="btnIn">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M14 4.5h4a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-4"/><path d="M10 8.2 13.8 12 10 15.8M13.3 12H3.8"/></svg></span>
+        <span class="th">เข้างาน</span><span class="en">CLOCK IN</span>
+      </button>
+      <button class="tile" id="btnOut">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M10 4.5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h4"/><path d="M16.2 8.2 20 12l-3.8 3.8M19.5 12H10"/></svg></span>
+        <span class="th">ออกงาน</span><span class="en">CLOCK OUT</span>
+      </button>
+      <button class="tile" id="btnOT">
+        <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.4V12l3.1 1.9"/></svg></span>
+        <span class="th">ทำงานล่วงเวลา</span><span class="en">OVERTIME</span>
+        <span class="bd" id="otBadge">0 ชม.</span>
+      </button>
+      <button class="tile" id="btnLeave">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="3.2"/><path d="M3.5 10h17M8 3.5v4M16 3.5v4M9.3 15.2l1.9 1.9 3.6-3.9"/></svg></span>
+        <span class="th">ลางาน</span><span class="en">LEAVE</span>
+        <span class="bd" id="leaveBadge">0 วัน</span>
+      </button>
+      <button class="tile" id="btnNote">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M5 4.5h11l3.5 3.5v11a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V6A1.5 1.5 0 0 1 5 4.5Z"/><path d="M7.5 10h9M7.5 14h6"/></svg></span>
+        <span class="th">หมายเหตุ</span><span class="en">REMARKS</span>
+        <span class="bd" id="noteBadge">ยังไม่มี</span>
+      </button>
+      <button class="tile" id="btnReport">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M8 15.5v-3M12 15.5v-6M16 15.5v-4"/></svg></span>
+        <span class="th">รายงานวันทำงาน</span><span class="en">REPORT</span>
+        <span class="bd" id="repBadge">0 วัน</span>
+      </button>
+    </div>
+
+    <div class="pending" id="pendingBox"></div>
+    <div class="foot"><button class="link" id="btnForget">ไม่ใช่ฉัน · เปลี่ยนรหัสพนักงาน</button></div>
+  </div>
+</section>
+
+<!-- ===== Report ===== -->
+<section id="report" class="screen">
+  <div class="wrap">
+    <div class="rep-head">
+      <button class="back" id="btnBack">‹ กลับ</button>
+      <h2 class="rep-title" id="repTitle">รายงานวันทำงาน</h2>
+    </div>
+    <div class="seg" id="seg">
+      <button data-tab="work" class="on">เวลาทำงาน</button>
+      <button data-tab="ot">ล่วงเวลา</button>
+      <button data-tab="leave">ลางาน</button>
+    </div>
+    <div class="month-nav">
+      <button id="mPrev">‹</button>
+      <div class="m" id="mLabel">—</div>
+      <button id="mNext">›</button>
+    </div>
+    <div class="sum" id="sum"></div>
+    <div class="rows" id="rows"></div>
+    <button class="btn btn-ghost" id="btnCsv" style="margin-top:16px">ดาวน์โหลดไฟล์ CSV</button>
+  </div>
+</section>
+
+<div class="sheet-bg" id="sheetBg"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ CONFIG ============
+   This page is only a front end. Every read and write goes to one n8n
+   webhook, which talks to Lark Base. Leave API_URL empty to run the
+   built-in demo (data stays in this browser only).                     */
+const CONFIG = {
+  API_URL: "https://n8n.sroyba.online/webhook/cubic-hr",  // production n8n webhook
+  API_KEY: "",              // optional, sent as x-api-key
+  REQUIRE_GPS: true,        // block check-in/out without a position fix
+  REQUIRE_PHOTO: true,      // block check-in/out without a photo
+  GPS_MAX_ACCURACY: 150,    // metres; only shown as a note, never blocks
+  PHOTO_MAX_PX: 640,        // photo is downscaled to this width before upload
+  PHOTO_QUALITY: 0.7,
+  WORK_START: "09:00",      // late threshold (display only)
+  GRACE_MIN: 10,
+  FULL_DAY_HOURS: 8,        // ring target
+  SHOW_WEEKEND: false,
+  OT_MAX_HOURS: 12,
+  LEAVE_TYPES: ["ลาป่วย","ลากิจ","ลาพักร้อน","ลาอื่น ๆ"],
+  DEMO_EMPLOYEES: {         // used only when API_URL is empty
+    "1234": { id:"EMP001", name:"ภูมิรินทร์ ส.",  dept:"ฝ่ายเทคโนโลยี" },
+    "2468": { id:"EMP002", name:"สมชาย ใจดี",     dept:"ฝ่ายขาย" },
+    "1357": { id:"EMP003", name:"อารีย์ วงศ์งาม", dept:"ฝ่ายบุคคล" }
+  }
+};
+
+/* ============ Safe storage (cache + offline queue only) ============ */
+const mem = {};
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return mem[k] ?? null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){ delete mem[k]; } }
+};
+const K = { pin:"cubic_pin", me:"cubic_me", queue:"cubic_queue", cache:"cubic_cache_", demo:"cubic_demo" };
+
+/* ============ Helpers ============ */
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,"0");
+const TH_DAY   = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+const TH_DAY_S = ["อา","จ","อ","พ","พฤ","ศ","ส"];
+const TH_MON   = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+const TH_MON_S = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const hhmm   = d => pad(d.getHours())+":"+pad(d.getMinutes());
+const hhmmss = d => hhmm(d)+":"+pad(d.getSeconds());
+const dateKey = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const monthKey = d => d.getFullYear()+"-"+pad(d.getMonth()+1);
+const thaiLong  = d => "วัน"+TH_DAY[d.getDay()]+"ที่ "+d.getDate()+" "+TH_MON[d.getMonth()]+" "+(d.getFullYear()+543);
+const thaiShort = d => TH_DAY[d.getDay()]+"ที่ "+d.getDate()+" "+TH_MON_S[d.getMonth()]+" "+(d.getFullYear()+543);
+const dkThai = dk => { const d = new Date(dk); return d.getDate()+" "+TH_MON_S[d.getMonth()]+" "+(d.getFullYear()+543); };
+const toMin = t => { const p = String(t).split(":").map(Number); return p[0]*60 + p[1]; };
+const fmtHrs = m => (m/60).toFixed(1);
+const fmtHM = m => { m = Math.round(m||0); const h = Math.floor(m/60), n = m%60;
+  return h && n ? h+" ชม. "+n+" น." : h ? h+" ชม." : n+" น."; };
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const daysBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000) + 1;
+
+let me = null, busy = false, loading = false, noteDraft = "";
+let repMonth = new Date(), repTab = "work";
+let data = { month:"", work:[], ot:[], leave:[] };   // current month, straight from Lark
+
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("on"), 2800);
+}
+const workDay = dk => data.work.find(r => r.date === dk) || null;
+
+/* ============ API layer (single n8n endpoint -> Lark Base) ============ */
+async function api(action, payload){
+  if(!CONFIG.API_URL) return demoApi(action, payload || {});
+  const headers = { "Content-Type":"application/json" };
+  if(CONFIG.API_KEY) headers["x-api-key"] = CONFIG.API_KEY;
+  const r = await fetch(CONFIG.API_URL, {
+    method:"POST", headers, body: JSON.stringify(Object.assign({ action }, payload))
+  });
+  if(!r.ok) throw new Error("HTTP " + r.status);
+  const j = await r.json();
+  if(j && j.ok === false) throw new Error(j.error || "ระบบปฏิเสธคำขอ");
+  return j;
+}
+
+/* Demo backend: keeps the page usable before n8n is wired up */
+function demoDb(){ try{ return JSON.parse(store.get(K.demo) || '{"punch":[],"ot":[],"leave":[]}'); }catch(e){ return {punch:[],ot:[],leave:[]}; } }
+function demoSave(db){ store.set(K.demo, JSON.stringify(db)); }
+function demoApi(action, p){
+  const db = demoDb();
+  if(action === "auth"){
+    const emp = CONFIG.DEMO_EMPLOYEES[p.code];
+    return emp ? { ok:true, employee: emp } : { ok:false, error:"ไม่พบรหัสพนักงาน" };
+  }
+  if(action === "month"){
+    const pre = p.month + "-";
+    const byDate = {};
+    db.punch.filter(r => r.employee_id === p.employee_id && r.date.startsWith(pre)).forEach(r=>{
+      byDate[r.date] = byDate[r.date] || { date:r.date };
+      if(r.type === "in"){ byDate[r.date].in = r.time; byDate[r.date].note_in = r.note; }
+      else { byDate[r.date].out = r.time; byDate[r.date].note_out = r.note; }
+    });
+    return { ok:true,
+      work: Object.values(byDate),
+      ot: db.ot.filter(r => r.employee_id === p.employee_id && r.date.startsWith(pre)),
+      leave: db.leave.filter(r => r.employee_id === p.employee_id && r.date.startsWith(pre)) };
+  }
+  if(action === "punch"){ db.punch.push(p); demoSave(db); return { ok:true, record_id:"demo_"+Date.now() }; }
+  if(action === "ot" || action === "leave"){
+    const rec = Object.assign({ status:"รออนุมัติ" }, p);
+    db[action].push(rec); demoSave(db);
+    return { ok:true, record_id:"demo_"+Date.now() };
+  }
+  return { ok:false, error:"unknown action" };
+}
+
+/* ============ Month load (with offline cache) ============ */
+function cacheKey(mk){ return K.cache + me.id + "_" + mk; }
+function readCache(mk){ try{ return JSON.parse(store.get(cacheKey(mk)) || "null"); }catch(e){ return null; } }
+function writeCache(mk, d){ store.set(cacheKey(mk), JSON.stringify(d)); }
+
+async function loadMonth(mk, opts){
+  const silent = opts && opts.silent;
+  loading = true; if(!silent) renderLoading();
+  try{
+    const res = await api("month", { employee_id: me.id, employee_code: me.code, month: mk });
+    data = { month: mk, work: res.work || [], ot: res.ot || [], leave: res.leave || [] };
+    writeCache(mk, data);
+    setOffline(false);
+  }catch(e){
+    const c = readCache(mk);
+    data = c || { month: mk, work:[], ot:[], leave:[] };
+    setOffline(true, e.message);
+  }
+  loading = false;
+  return data;
+}
+function setOffline(on, msg){
+  const box = $("#pendingBox");
+  const q = queueGet().length;
+  if(on){
+    box.classList.add("on");
+    box.textContent = "ต่อระบบไม่ได้ กำลังแสดงข้อมูลที่บันทึกไว้ในเครื่อง" + (q ? " · มี " + q + " รายการรอส่ง" : "");
+  }else if(q){
+    box.classList.add("on");
+    box.textContent = "มี " + q + " รายการรอส่ง จะส่งอัตโนมัติเมื่อกลับมาออนไลน์";
+  }else box.classList.remove("on");
+}
+
+/* ============ PIN ============ */
+let buf = "";
+const renderDots = () => document.querySelectorAll("#dots .dot").forEach((d,i)=>d.classList.toggle("fill", i < buf.length));
+
+$("#keypad").addEventListener("click", e=>{
+  const b = e.target.closest("[data-k]"); if(!b || busy) return;
+  const k = b.dataset.k;
+  if(k === "del"){ buf = buf.slice(0,-1); return renderDots(); }
+  if(buf.length >= 4) return;
+  buf += k; renderDots();
+  if(buf.length === 4) setTimeout(checkPin, 140);
+});
+document.addEventListener("keydown", e=>{
+  if(!$("#pin").classList.contains("on") || busy) return;
+  if(/^[0-9]$/.test(e.key) && buf.length < 4){ buf += e.key; renderDots(); if(buf.length === 4) setTimeout(checkPin,140); }
+  if(e.key === "Backspace"){ buf = buf.slice(0,-1); renderDots(); }
+});
+async function checkPin(){
+  const code = buf;
+  busy = true; $("#pinMsg").textContent = "กำลังตรวจสอบ…"; $("#pinMsg").style.color = "var(--muted)";
+  let res;
+  try{ res = await api("auth", { code }); }
+  catch(e){ res = { ok:false, error:"ต่อระบบไม่ได้ ลองใหม่อีกครั้ง" }; }
+  busy = false;
+  $("#pinMsg").style.color = "";
+
+  if(!res || !res.ok){
+    $("#pinMsg").textContent = (res && res.error) || "รหัสไม่ถูกต้อง ลองอีกครั้ง";
+    $(".pin-wrap").classList.add("shake");
+    setTimeout(()=>$(".pin-wrap").classList.remove("shake"), 400);
+    buf = ""; renderDots();
+    if(navigator.vibrate) navigator.vibrate(60);
+    return;
+  }
+  $("#pinMsg").textContent = "";
+  me = Object.assign({ code }, res.employee);
+  store.set(K.pin, code);                    // remember on this device
+  store.set(K.me, JSON.stringify(me));
+  buf = ""; renderDots();
+  openHome();
+}
+
+async function openHome(){
+  $("#pin").classList.remove("on"); $("#report").classList.remove("on"); $("#home").classList.add("on");
+  $("#whoName").textContent = me.name;
+  $("#avatar").textContent = (me.name || "?").trim().charAt(0);
+  renderToday(); renderBadges();
+  await flushQueue();
+  await loadMonth(monthKey(new Date()), { silent:true });
+  renderToday(); renderBadges();
+}
+
+/* ============ Today ============ */
+const todayRec = () => workDay(dateKey(new Date())) || {};
+function renderToday(){
+  const r = todayRec();
+  $("#tIn").textContent  = r.in  || "--:--";
+  $("#tOut").textContent = r.out || "--:--";
+  $("#tIn").classList.toggle("dim", !r.in);
+  $("#tOut").classList.toggle("dim", !r.out);
+  renderRing();
+
+  const bar = $("#stateBar"); bar.className = "state";
+  if(r.out){ bar.classList.add("out"); $("#stateText").textContent = "ออกงานแล้ว " + r.out + " · ขอบคุณสำหรับวันนี้"; }
+  else if(r.in){ bar.classList.add("in"); $("#stateText").textContent = "กำลังทำงาน · เข้างานเวลา " + r.in; }
+  else $("#stateText").textContent = "ยังไม่ได้บันทึกเวลาวันนี้";
+
+  $("#btnIn").disabled  = !!r.in;
+  $("#btnOut").disabled = !r.in || !!r.out;
+}
+function renderRing(){
+  const r = todayRec(), C = 283;
+  let mins = 0;
+  if(r.in) mins = Math.max(0, (r.out ? toMin(r.out) : toMin(hhmm(new Date()))) - toMin(r.in));
+  const hrs = mins/60;
+  $("#ringVal").textContent = hrs.toFixed(1);
+  $("#ringFg").setAttribute("stroke-dashoffset", C - C * Math.min(1, hrs / CONFIG.FULL_DAY_HOURS));
+}
+function renderBadges(){
+  const w = sumWork(), o = sumOT(), l = sumLeave();
+  $("#repBadge").textContent   = w.days + " วัน";
+  $("#otBadge").textContent    = o.mins ? fmtHM(o.mins) : "0 น.";
+  $("#leaveBadge").textContent = l.days + " วัน" + (l.mins ? " + " + fmtHM(l.mins) : "");
+  $("#noteBadge").textContent  = noteDraft ? "มีบันทึก" : "ยังไม่มี";
+}
+
+/* ============ Clock ============ */
+function tick(){
+  const d = new Date();
+  $("#clockTime").textContent = hhmmss(d);
+  $("#clockDate").textContent = thaiLong(d);
+  $("#pinDate").textContent   = thaiShort(d);
+  const bd = $("#boardDate");
+  if(bd) bd.textContent = pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + (d.getFullYear()+543);
+  if(me){ const r = todayRec(); if(r.in && !r.out) renderRing(); }
+}
+setInterval(tick, 1000); tick();
+
+/* ============ Sheet ============ */
+const openSheet  = () => $("#sheetBg").classList.add("on");
+const closeSheet = () => $("#sheetBg").classList.remove("on");
+$("#sheetBg").addEventListener("click", e=>{ if(e.target.id === "sheetBg" && !busy) closeSheet(); });
+
+function doneSheet(title, line, sent){
+  const sub = sent ? "บันทึกลง Lark Base แล้ว" : "ส่งไม่สำเร็จ · เก็บไว้ในเครื่อง จะส่งอัตโนมัติเมื่อกลับมาออนไลน์";
+  $("#sheet").innerHTML =
+    '<svg class="check" viewBox="0 0 80 80"><circle cx="40" cy="40" r="34"/><path d="M25 41 l11 11 l20 -22"/></svg>' +
+    '<h3>' + title + '</h3><p>' + line + ' · ' + sub + '</p>' +
+    '<button class="btn btn-primary" id="done">เสร็จสิ้น</button>';
+  $("#done").onclick = closeSheet;
+  setTimeout(()=>{ if($("#sheetBg").classList.contains("on")) closeSheet(); }, 3800);
+}
+
+/* ============ Clock in / out (GPS + photo required) ============ */
+$("#btnIn").addEventListener("click", ()=>punchSheet("in"));
+$("#btnOut").addEventListener("click", ()=>punchSheet("out"));
+
+let cam = { stream:null, photo:null, fix:null, watch:null, type:null, timer:null };
+
+function punchSheet(type){
+  cam.type = type; cam.photo = null; cam.fix = null;
+  const label = type === "in" ? "เข้างาน" : "ออกงาน";
+  $("#sheet").innerHTML =
+    '<h3>' + label + '</h3><p>ถ่ายภาพยืนยันตัวตน · ระบบบันทึกพิกัดอัตโนมัติ</p>' +
+    '<div class="cap-wrap">' +
+      '<video id="cam" playsinline muted autoplay></video>' +
+      '<img id="shot" alt="">' +
+      '<div class="cap-time" id="capTime">--:--:--</div>' +
+      '<input type="file" id="camFile" accept="image/*" capture="user" hidden>' +
+    '</div>' +
+    '<div class="gps-row" id="gpsRow"><span class="spin dark"></span><span id="gpsText">กำลังอ่านพิกัด…</span></div>' +
+    '<div class="err" id="pErr"></div>' +
+    '<button class="btn btn-primary" id="shotBtn">ถ่ายภาพ</button>' +
+    '<button class="btn btn-ghost" id="pCancel">ยกเลิก</button>';
+  openSheet();
+  $("#pCancel").onclick = ()=>{ stopCam(); closeSheet(); };
+  $("#shotBtn").onclick = takeShot;
+  $("#camFile").onchange = fileShot;
+  startClockStamp();
+  startCam();
+  startGPS();
+}
+
+function startClockStamp(){
+  clearInterval(cam.timer);
+  const f = ()=>{ const el = $("#capTime"); if(el) el.textContent = hhmmss(new Date()); };
+  f(); cam.timer = setInterval(f, 1000);
+}
+async function startCam(){
+  try{
+    cam.stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode:"user", width:{ ideal:960 }, height:{ ideal:720 } }, audio:false
+    });
+    const v = $("#cam"); if(!v){ stopCam(); return; }
+    v.srcObject = cam.stream; await v.play();
+  }catch(e){
+    // no camera API or denied: fall back to the device camera app
+    const w = $(".cap-wrap");
+    if(w) w.classList.add("nocam");
+    const b = $("#shotBtn");
+    if(b) b.textContent = "เปิดกล้องเพื่อถ่ายภาพ";
+    cam.stream = null;
+  }
+}
+function stopCam(){
+  clearInterval(cam.timer);
+  if(cam.stream){ cam.stream.getTracks().forEach(t => t.stop()); cam.stream = null; }
+  if(cam.watch != null && navigator.geolocation){ navigator.geolocation.clearWatch(cam.watch); cam.watch = null; }
+}
+function takeShot(){
+  if(!cam.stream) return $("#camFile").click();     // fallback path
+  const v = $("#cam");
+  const w = CONFIG.PHOTO_MAX_PX, h = Math.round(w * (v.videoHeight / v.videoWidth));
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const g = c.getContext("2d");
+  g.translate(w, 0); g.scale(-1, 1);                // un-mirror the selfie
+  g.drawImage(v, 0, 0, w, h);
+  stampPhoto(g, w, h);
+  cam.photo = c.toDataURL("image/jpeg", CONFIG.PHOTO_QUALITY);
+  showShot();
+}
+function fileShot(e){
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  const img = new Image();
+  img.onload = ()=>{
+    const w = CONFIG.PHOTO_MAX_PX, h = Math.round(w * (img.height / img.width));
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    const g = c.getContext("2d");
+    g.drawImage(img, 0, 0, w, h);
+    stampPhoto(g, w, h);
+    cam.photo = c.toDataURL("image/jpeg", CONFIG.PHOTO_QUALITY);
+    URL.revokeObjectURL(img.src);
+    showShot();
+  };
+  img.src = URL.createObjectURL(f);
+}
+// burn time + coords into the image so the photo is self-evidencing
+function stampPhoto(g, w, h){
+  const now = new Date();
+  const l1 = hhmmss(now) + "  " + dateKey(now);
+  const l2 = cam.fix ? (cam.fix.lat.toFixed(5) + ", " + cam.fix.lng.toFixed(5) + "  ±" + Math.round(cam.fix.acc) + "m") : "ไม่มีพิกัด";
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.fillStyle = "rgba(0,0,0,.45)";
+  g.fillRect(0, h - 54, w, 54);
+  g.fillStyle = "#fff";
+  g.font = "600 20px sans-serif"; g.fillText(l1, 12, h - 30);
+  g.font = "400 15px sans-serif"; g.fillText(l2, 12, h - 10);
+}
+function showShot(){
+  const img = $("#shot"); if(!img) return;
+  img.src = cam.photo;
+  $(".cap-wrap").classList.add("shot");
+  const b = $("#shotBtn");
+  b.textContent = "ยืนยัน" + (cam.type === "in" ? "เข้างาน" : "ออกงาน");
+  b.onclick = ()=>submitPunch();
+  if(!$("#retake")){
+    const r = document.createElement("button");
+    r.className = "btn btn-ghost"; r.id = "retake"; r.textContent = "ถ่ายใหม่";
+    $("#pCancel").before(r);
+    r.onclick = ()=>{
+      cam.photo = null; $(".cap-wrap").classList.remove("shot"); r.remove();
+      const bb = $("#shotBtn");
+      bb.textContent = cam.stream ? "ถ่ายภาพ" : "เปิดกล้องเพื่อถ่ายภาพ";
+      bb.onclick = takeShot;
+    };
+  }
+  gpsUI();
+}
+
+/* ---- GPS: automatic, read-only, required ---- */
+function startGPS(){
+  if(!navigator.geolocation){ cam.fix = null; return gpsUI("เครื่องนี้ไม่รองรับการระบุตำแหน่ง"); }
+  cam.watch = navigator.geolocation.watchPosition(
+    p=>{
+      cam.fix = { lat:+p.coords.latitude.toFixed(6), lng:+p.coords.longitude.toFixed(6),
+                  acc: p.coords.accuracy, at: new Date(p.timestamp).toISOString() };
+      gpsUI();
+    },
+    err=>{ cam.fix = null; gpsUI(err.code === 1 ? "ไม่ได้อนุญาตให้เข้าถึงตำแหน่ง" : "อ่านพิกัดไม่สำเร็จ"); },
+    { enableHighAccuracy:true, timeout:15000, maximumAge:0 }
+  );
+}
+function gpsUI(msg){
+  const row = $("#gpsRow"); if(!row) return;
+  const btn = $("#shotBtn"), ready = !!cam.fix;
+  if(!ready){
+    row.className = "gps-row bad";
+    row.innerHTML = msg
+      ? '<span class="gdot"></span><span>' + esc(msg) + ' · เปิด GPS แล้วลองใหม่</span>'
+      : '<span class="spin dark"></span><span>กำลังอ่านพิกัด…</span>';
+  }else{
+    const coarse = cam.fix.acc > CONFIG.GPS_MAX_ACCURACY;
+    row.className = "gps-row " + (coarse ? "warn" : "ok");
+    row.innerHTML = '<span class="gdot"></span><span>' +
+      cam.fix.lat.toFixed(5) + ", " + cam.fix.lng.toFixed(5) +
+      " · ความแม่นยำ ±" + Math.round(cam.fix.acc) + " ม." +
+      (coarse ? " · รอสัญญาณนิ่งขึ้นจะแม่นกว่านี้" : "") + '</span>';
+  }
+  if(btn && cam.photo) btn.disabled = CONFIG.REQUIRE_GPS && !ready;
+}
+
+async function submitPunch(){
+  if(busy) return;
+  if(CONFIG.REQUIRE_PHOTO && !cam.photo) return ($("#pErr").textContent = "ถ่ายภาพก่อนยืนยัน");
+  if(CONFIG.REQUIRE_GPS && !cam.fix) return ($("#pErr").textContent = "ยังอ่านพิกัดไม่ได้ เปิด GPS แล้วลองใหม่");
+  $("#pErr").textContent = "";
+
+  busy = true;
+  const btn = $("#shotBtn"); btn.innerHTML = '<span class="spin"></span> กำลังบันทึก'; btn.disabled = true;
+
+  const now = new Date(), type = cam.type;
+  const rec = {
+    employee_id: me.id, employee_code: me.code, name: me.name, dept: me.dept,
+    type, date: dateKey(now), weekday: TH_DAY[now.getDay()], time: hhmm(now),
+    timestamp: now.toISOString(), note: noteDraft,
+    lat: cam.fix ? cam.fix.lat : null,
+    lng: cam.fix ? cam.fix.lng : null,
+    accuracy_m: cam.fix ? Math.round(cam.fix.acc) : null,
+    fix_at: cam.fix ? cam.fix.at : null,
+    map_url: cam.fix ? ("https://www.google.com/maps?q=" + cam.fix.lat + "," + cam.fix.lng) : null,
+    photo: cam.photo || null,                       // data URL (jpeg base64)
+    photo_name: me.id + "_" + type + "_" + dateKey(now) + "_" + hhmm(now).replace(":","") + ".jpg",
+    device: navigator.userAgent
+  };
+
+  const sent = await sendOrQueue("punch", rec);
+  stopCam();
+  applyPunchLocal(rec);
+  noteDraft = "";
+  renderToday(); renderBadges();
+  if(navigator.vibrate) navigator.vibrate(30);
+  doneSheet(type === "in" ? "เข้างานเรียบร้อย" : "ออกงานเรียบร้อย",
+            "เวลา " + rec.time + (rec.lat ? " · บันทึกพิกัดแล้ว" : ""), sent);
+  busy = false;
+  if(sent) refreshCurrentMonth();
+}
+function applyPunchLocal(rec){
+  if(data.month !== rec.date.slice(0,7)) return;
+  let row = data.work.find(r => r.date === rec.date);
+  if(!row){ row = { date: rec.date }; data.work.push(row); }
+  if(rec.type === "in"){ row.in = rec.time; row.note_in = rec.note; }
+  else { row.out = rec.time; row.note_out = rec.note; }
+  writeCache(data.month, data);
+}
+async function refreshCurrentMonth(){
+  const mk = monthKey(new Date());
+  await loadMonth(mk, { silent:true });
+  renderToday(); renderBadges();
+  if($("#report").classList.contains("on") && monthKey(repMonth) === mk) renderReport();
+}
+
+/* ============ Remarks ============ */
+$("#btnNote").addEventListener("click", ()=>{
+  $("#sheet").innerHTML =
+    '<h3>หมายเหตุ</h3><p>แนบไปกับการสแกนครั้งถัดไป</p>' +
+    '<div class="form"><div class="field">' +
+      '<textarea id="ndraft" maxlength="200" placeholder="เช่น ออกพบลูกค้า, รถติด">' + esc(noteDraft) + '</textarea>' +
+    '</div></div>' +
+    '<button class="btn btn-primary" id="nOk">บันทึกหมายเหตุ</button>' +
+    '<button class="btn btn-ghost" id="nCancel">ยกเลิก</button>';
+  openSheet();
+  $("#nCancel").onclick = closeSheet;
+  $("#nOk").onclick = ()=>{
+    noteDraft = $("#ndraft").value.trim();
+    renderBadges(); closeSheet();
+    toast(noteDraft ? "บันทึกหมายเหตุแล้ว" : "ล้างหมายเหตุแล้ว");
+  };
+});
+
+/* ============ OT ============ */
+$("#btnOT").addEventListener("click", openOT);
+function openOT(){
+  const today = dateKey(new Date()), r = todayRec(), start = r.out || "18:00";
+  $("#sheet").innerHTML =
+    '<h3>ทำงานล่วงเวลา</h3><p>ส่งคำขอ OT เข้าตารางอนุมัติ</p>' +
+    '<div class="form">' +
+      '<div class="field"><label>ประเภทคำขอ</label><div class="chips" id="otKind">' +
+        '<button class="chip on" data-v="ล่วงหน้า">ขอล่วงหน้า</button>' +
+        '<button class="chip" data-v="ย้อนหลัง">แจ้งย้อนหลัง</button></div></div>' +
+      '<div class="field"><label>วันที่ทำ OT</label><input type="date" id="otDate" value="' + today + '"></div>' +
+      '<div class="field pair">' +
+        '<div><label>เวลาเริ่ม</label><input type="time" id="otStart" value="' + start + '"></div>' +
+        '<div><label>เวลาสิ้นสุด</label><input type="time" id="otEnd" value="20:00"></div></div>' +
+      '<div class="calc" id="otCalc">รวม <b>120</b> นาที</div>' +
+      '<div class="field"><label>เหตุผล / งานที่ทำ</label><textarea id="otNote" maxlength="200" placeholder="เช่น ปิดยอดสิ้นเดือน"></textarea></div>' +
+    '</div>' +
+    '<div class="err" id="otErr"></div>' +
+    '<button class="btn btn-primary" id="otOk">ส่งคำขอ OT</button>' +
+    '<button class="btn btn-ghost" id="otCancel">ยกเลิก</button>';
+  openSheet();
+  chips("#otKind");
+  ["#otStart","#otEnd"].forEach(s => $(s).addEventListener("input", otCalc));
+  otCalc();
+  $("#otCancel").onclick = closeSheet;
+  $("#otOk").onclick = submitOT;
+}
+function chips(sel){
+  const box = $(sel);
+  box.addEventListener("click", e=>{
+    const b = e.target.closest(".chip"); if(!b) return;
+    box.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === b));
+  });
+}
+const chipVal = sel => $(sel).querySelector(".chip.on").dataset.v;
+function otMinutes(){
+  const s = $("#otStart").value, e = $("#otEnd").value;
+  if(!s || !e) return 0;
+  let m = toMin(e) - toMin(s);
+  if(m < 0) m += 24*60;                         // crosses midnight
+  return m;
+}
+function otCalc(){
+  const m = otMinutes(), cross = $("#otEnd").value && toMin($("#otEnd").value) < toMin($("#otStart").value);
+  $("#otCalc").innerHTML = "รวม <b>" + m + "</b> นาที (" + fmtHM(m) + ")" + (cross ? " · ข้ามวัน" : "");
+}
+async function submitOT(){
+  if(busy) return;
+  const date = $("#otDate").value, mins = otMinutes(), note = $("#otNote").value.trim();
+  if(!date) return ($("#otErr").textContent = "เลือกวันที่ก่อน");
+  if(mins <= 0) return ($("#otErr").textContent = "เวลาสิ้นสุดต้องไม่เท่ากับเวลาเริ่ม");
+  if(mins > CONFIG.OT_MAX_HOURS*60) return ($("#otErr").textContent = "ขอ OT ได้ไม่เกิน " + CONFIG.OT_MAX_HOURS + " ชั่วโมงต่อครั้ง");
+  if(!note) return ($("#otErr").textContent = "ใส่เหตุผลหรืองานที่ทำด้วย");
+  $("#otErr").textContent = "";
+
+  busy = true;
+  const btn = $("#otOk"); btn.innerHTML = '<span class="spin"></span> กำลังส่ง'; btn.disabled = true;
+
+  const rec = {
+    employee_id: me.id, employee_code: me.code, name: me.name, dept: me.dept,
+    ot_type: chipVal("#otKind"), date, start: $("#otStart").value, end: $("#otEnd").value,
+    minutes: mins, hours: +(mins/60).toFixed(2),
+    note, submitted_at: new Date().toISOString()
+  };
+  const sent = await sendOrQueue("ot", rec);
+  busy = false;
+  doneSheet("ส่งคำขอ OT แล้ว", dkThai(date) + " · " + rec.start + "–" + rec.end + " (" + mins + " นาที)", sent);
+  if(sent) refreshCurrentMonth();
+}
+
+/* ============ Leave ============ */
+$("#btnLeave").addEventListener("click", openLeave);
+function openLeave(){
+  const today = dateKey(new Date());
+  const types = CONFIG.LEAVE_TYPES.map((t,i) =>
+    '<button class="chip' + (i === 0 ? " on" : "") + '" data-v="' + esc(t) + '">' + esc(t) + '</button>').join("");
+  $("#sheet").innerHTML =
+    '<h3>ลางาน</h3><p>ส่งใบลาเข้าตารางอนุมัติ</p>' +
+    '<div class="form">' +
+      '<div class="field"><label>ประเภทการลา</label><div class="chips" id="lvType">' + types + '</div></div>' +
+      '<div class="field pair">' +
+        '<div><label>ลาตั้งแต่วันที่</label><input type="date" id="lvFrom" value="' + today + '"></div>' +
+        '<div><label>ถึงวันที่</label><input type="date" id="lvTo" value="' + today + '"></div></div>' +
+      '<div class="field"><label>ช่วงเวลา</label><div class="chips" id="lvSpan">' +
+        '<button class="chip on" data-v="เต็มวัน">ลาเต็มวัน</button>' +
+        '<button class="chip" data-v="รายชั่วโมง">ลาเป็นชั่วโมง</button></div></div>' +
+      '<div class="field pair" id="lvTimeRow" style="display:none">' +
+        '<div><label>ตั้งแต่เวลา</label><input type="time" id="lvStart" value="09:00"></div>' +
+        '<div><label>ถึงเวลา</label><input type="time" id="lvEnd" value="12:00"></div></div>' +
+      '<div class="calc" id="lvCalc">รวม <b>1</b> วัน</div>' +
+      '<div class="field"><label>เหตุผล</label><textarea id="lvNote" maxlength="200" placeholder="เช่น พาลูกไปหาหมอ"></textarea></div>' +
+    '</div>' +
+    '<div class="err" id="lvErr"></div>' +
+    '<button class="btn btn-primary" id="lvOk">ส่งใบลา</button>' +
+    '<button class="btn btn-ghost" id="lvCancel">ยกเลิก</button>';
+  openSheet();
+  chips("#lvType"); chips("#lvSpan");
+  ["#lvFrom","#lvTo","#lvStart","#lvEnd"].forEach(s => $(s).addEventListener("input", lvCalc));
+  $("#lvSpan").addEventListener("click", ()=>setTimeout(lvCalc, 0));
+  lvCalc();
+  $("#lvCancel").onclick = closeSheet;
+  $("#lvOk").onclick = submitLeave;
+}
+function lvMinutes(){
+  const a = $("#lvStart").value, b = $("#lvEnd").value;
+  if(!a || !b) return 0;
+  return Math.max(0, toMin(b) - toMin(a));
+}
+function lvDays(){
+  const a = $("#lvFrom").value, b = $("#lvTo").value;
+  if(!a || !b) return 0;
+  const n = daysBetween(a, b);
+  if(n < 1) return 0;
+  return chipVal("#lvSpan") === "รายชั่วโมง" ? 0 : n;
+}
+function lvCalc(){
+  const span = chipVal("#lvSpan"), hourly = span === "รายชั่วโมง";
+  const row = $("#lvTimeRow"); if(row) row.style.display = hourly ? "grid" : "none";
+  const to = $("#lvTo").closest("div");
+  if(to) to.style.opacity = hourly ? ".45" : "1";
+  if(hourly && $("#lvTo").value !== $("#lvFrom").value) $("#lvTo").value = $("#lvFrom").value;
+
+  if(hourly){
+    const m = lvMinutes();
+    $("#lvCalc").innerHTML = "รวม <b>" + m + "</b> นาที (" + fmtHM(m) + ")";
+  }else{
+    $("#lvCalc").innerHTML = "รวม <b>" + lvDays() + "</b> วัน";
+  }
+}
+
+async function submitLeave(){
+  if(busy) return;
+  const span = chipVal("#lvSpan"), hourly = span === "รายชั่วโมง";
+  const from = $("#lvFrom").value, to = hourly ? from : $("#lvTo").value;
+  const note = $("#lvNote").value.trim();
+  const days = hourly ? 0 : lvDays(), mins = hourly ? lvMinutes() : 0;
+
+  if(!from || !to) return ($("#lvErr").textContent = "เลือกวันที่ให้ครบ");
+  if(hourly && mins <= 0) return ($("#lvErr").textContent = "เวลาสิ้นสุดต้องหลังเวลาเริ่ม");
+  if(!hourly && days <= 0) return ($("#lvErr").textContent = "วันสิ้นสุดต้องไม่ก่อนวันเริ่มลา");
+  if(!note) return ($("#lvErr").textContent = "ใส่เหตุผลการลาด้วย");
+  $("#lvErr").textContent = "";
+
+  busy = true;
+  const btn = $("#lvOk"); btn.innerHTML = '<span class="spin"></span> กำลังส่ง'; btn.disabled = true;
+
+  const rec = {
+    employee_id: me.id, employee_code: me.code, name: me.name, dept: me.dept,
+    leave_type: chipVal("#lvType"), span,
+    date: from, date_to: to, days, minutes: mins,
+    start: hourly ? $("#lvStart").value : "", end: hourly ? $("#lvEnd").value : "",
+    note, submitted_at: new Date().toISOString()
+  };
+  const sent = await sendOrQueue("leave", rec);
+  busy = false;
+  const range = from === to ? dkThai(from) : dkThai(from) + " – " + dkThai(to);
+  const amount = hourly ? (rec.start + "–" + rec.end + " · " + mins + " นาที") : (days + " วัน");
+  doneSheet("ส่งใบลาแล้ว", rec.leave_type + " · " + range + " (" + amount + ")", sent);
+  if(sent) refreshCurrentMonth();
+}
+
+/* ============ Write + offline queue ============ */
+async function sendOrQueue(action, rec){
+  try{ await api(action, rec); setOffline(false); return true; }
+  catch(e){ queuePush({ action, rec }); setOffline(true); return false; }
+}
+function queueGet(){ try{ return JSON.parse(store.get(K.queue) || "[]"); }catch(e){ return []; } }
+function queuePush(item){ const q = queueGet(); q.push(item); store.set(K.queue, JSON.stringify(q)); }
+async function flushQueue(){
+  const q = queueGet(); if(!q.length) return setOffline(false);
+  const left = [];
+  for(const it of q){
+    try{ await api(it.action, it.rec); }catch(e){ left.push(it); }
+  }
+  store.set(K.queue, JSON.stringify(left));
+  if(!left.length){ setOffline(false); toast("ส่งรายการที่ค้างไว้เรียบร้อยแล้ว"); }
+  else setOffline(true);
+}
+window.addEventListener("online", async ()=>{ await flushQueue(); refreshCurrentMonth(); });
+
+/* ============ Report ============ */
+$("#btnReport").addEventListener("click", async ()=>{
+  repMonth = new Date(); repTab = "work"; setSeg();
+  $("#home").classList.remove("on"); $("#report").classList.add("on");
+  renderLoading();
+  await loadMonth(monthKey(repMonth));
+  renderReport();
+});
+$("#btnBack").addEventListener("click", ()=>{ $("#report").classList.remove("on"); $("#home").classList.add("on"); });
+$("#mPrev").addEventListener("click", ()=>changeMonth(-1));
+$("#mNext").addEventListener("click", ()=>changeMonth(1));
+$("#seg").addEventListener("click", e=>{
+  const b = e.target.closest("[data-tab]"); if(!b) return;
+  repTab = b.dataset.tab; setSeg(); renderReport();
+});
+const setSeg = () => document.querySelectorAll("#seg button").forEach(b => b.classList.toggle("on", b.dataset.tab === repTab));
+
+async function changeMonth(delta){
+  if(loading) return;
+  repMonth = new Date(repMonth.getFullYear(), repMonth.getMonth() + delta, 1);
+  $("#mLabel").textContent = TH_MON[repMonth.getMonth()] + " " + (repMonth.getFullYear() + 543);
+  renderLoading();
+  await loadMonth(monthKey(repMonth));
+  renderReport();
+}
+function renderLoading(){
+  $("#mLabel").textContent = TH_MON[repMonth.getMonth()] + " " + (repMonth.getFullYear() + 543);
+  $("#sum").innerHTML = "";
+  $("#rows").innerHTML = '<div class="empty"><span class="spin dark"></span> กำลังโหลดข้อมูลจากระบบ…</div>';
+}
+
+function sumWork(){
+  let days = 0, mins = 0, late = 0, miss = 0;
+  data.work.forEach(r=>{
+    if(!r.in) return;
+    days++;
+    if(r.out) mins += Math.max(0, toMin(r.out) - toMin(r.in)); else miss++;
+    if(toMin(r.in) > toMin(CONFIG.WORK_START) + CONFIG.GRACE_MIN) late++;
+  });
+  return { days, mins, late, miss };
+}
+const otMins = r => +r.minutes || Math.round((+r.hours || 0) * 60);
+const sumOT    = () => ({ count: data.ot.length, mins: data.ot.reduce((a,b)=>a + otMins(b), 0) });
+const sumLeave = () => ({ count: data.leave.length,
+  days: data.leave.reduce((a,b)=>a + (+b.days || 0), 0),
+  mins: data.leave.reduce((a,b)=>a + (+b.minutes || 0), 0) });
+const cell = (lbl, val, unit) =>
+  '<div class="cell"><div class="lbl">' + lbl + '</div><div class="val">' + val + '<small>' + unit + '</small></div></div>';
+function statusTag(st){
+  const s = String(st || "รออนุมัติ");
+  const cls = /อนุมัติแล้ว|approved/i.test(s) ? "ok" : /ไม่อนุมัติ|ปฏิเสธ|reject/i.test(s) ? "no" : "wait";
+  return '<span class="tag ' + cls + '">' + esc(s) + '</span>';
+}
+
+function renderReport(){
+  $("#mLabel").textContent = TH_MON[repMonth.getMonth()] + " " + (repMonth.getFullYear() + 543);
+  $("#repTitle").textContent = repTab === "work" ? "รายงานวันทำงาน" : repTab === "ot" ? "รายงานล่วงเวลา" : "รายงานการลา";
+  if(repTab === "work") renderWork();
+  if(repTab === "ot")   renderOT();
+  if(repTab === "leave")renderLeave();
+}
+function renderWork(){
+  const s = sumWork();
+  $("#sum").innerHTML = cell("วันที่มาทำงาน", s.days, "วัน") + cell("ชั่วโมงรวม", fmtHrs(s.mins), "ชม.")
+                      + cell("มาสาย", s.late, "ครั้ง") + cell("ลืมออกงาน", s.miss, "ครั้ง");
+  const y = repMonth.getFullYear(), m = repMonth.getMonth();
+  const last = new Date(y, m+1, 0).getDate(), tk = dateKey(new Date()), rows = [];
+  for(let day = last; day >= 1; day--){
+    const d = new Date(y, m, day), dk = dateKey(d);
+    if(dk > tk) continue;
+    const r = workDay(dk), weekend = d.getDay() === 0 || d.getDay() === 6;
+    if(!r && !(weekend && CONFIG.SHOW_WEEKEND) && dk !== tk) continue;
+    rows.push({ d, weekend, rec: r || {} });
+  }
+  const box = $("#rows");
+  if(!rows.length){ box.innerHTML = '<div class="empty">ยังไม่มีบันทึกเวลาในเดือนนี้</div>'; return; }
+  box.innerHTML = rows.map(function(o){
+    const rec = o.rec, d = o.d, hasIn = !!rec.in;
+    const hrs = (rec.in && rec.out) ? fmtHrs(toMin(rec.out) - toMin(rec.in)) : null;
+    const isLate = hasIn && toMin(rec.in) > toMin(CONFIG.WORK_START) + CONFIG.GRACE_MIN;
+    const tags = (isLate ? '<span class="tag late">สาย</span>' : "")
+               + (hasIn && !rec.out ? '<span class="tag miss">ไม่มีเวลาออก</span>' : "");
+    const note = [rec.note_in, rec.note_out].filter(Boolean).join(" · ");
+    return '<div class="row' + (o.weekend ? " holiday" : "") + '">' +
+      '<div class="dnum"><b>' + pad(d.getDate()) + '</b><span>' + TH_DAY_S[d.getDay()] + '</span></div>' +
+      '<div class="times">' + (hasIn ? (rec.in + " – " + (rec.out || "--:--")) : "ไม่มีบันทึก") + tags +
+        (note ? '<div class="sub">' + esc(note) + '</div>' : "") + '</div>' +
+      '<div class="hrs">' + (hrs ? hrs + " ชม." : "") + '</div></div>';
+  }).join("");
+}
+function renderOT(){
+  const s = sumOT();
+  $("#sum").innerHTML = cell("จำนวนคำขอ", s.count, "ครั้ง")
+    + cell("OT รวม", s.mins, "นาที") + cell("คิดเป็น", fmtHM(s.mins), "");
+  const box = $("#rows");
+  if(!data.ot.length){ box.innerHTML = '<div class="empty">ยังไม่มีคำขอ OT ในเดือนนี้</div>'; return; }
+  box.innerHTML = data.ot.slice().sort((a,b)=> String(b.date).localeCompare(a.date)).map(function(r){
+    const d = new Date(r.date);
+    return '<div class="row">' +
+      '<div class="dnum"><b>' + pad(d.getDate()) + '</b><span>' + TH_DAY_S[d.getDay()] + '</span></div>' +
+      '<div class="times">' + esc(r.start) + " – " + esc(r.end) + statusTag(r.status) +
+        '<div class="sub">' + esc(r.ot_type) + " · " + esc(r.note) + '</div></div>' +
+      '<div class="hrs">' + otMins(r) + ' น.<div class="sub">' + fmtHM(otMins(r)) + '</div></div></div>';
+  }).join("");
+}
+function renderLeave(){
+  const s = sumLeave(), byType = {};
+  data.leave.forEach(r => { byType[r.leave_type] = (byType[r.leave_type] || 0) + (+r.days || 0); });
+  const top = Object.keys(byType).sort((a,b)=>byType[b]-byType[a])[0];
+  $("#sum").innerHTML = cell("จำนวนใบลา", s.count, "ใบ") + cell("วันลารวม", s.days, "วัน")
+    + (s.mins ? cell("ลาเป็นชั่วโมง", s.mins, "นาที") : "")
+    + (top ? '<div class="cell"><div class="lbl">ลามากที่สุด</div><div class="val" style="font-size:19px">' + esc(top) + '<small>' + byType[top] + ' วัน</small></div></div>' : "");
+  const box = $("#rows");
+  if(!data.leave.length){ box.innerHTML = '<div class="empty">ยังไม่มีใบลาในเดือนนี้</div>'; return; }
+  box.innerHTML = data.leave.slice().sort((a,b)=> String(b.date).localeCompare(a.date)).map(function(r){
+    const d = new Date(r.date);
+    const range = r.date === r.date_to ? dkThai(r.date) : dkThai(r.date) + " – " + dkThai(r.date_to);
+    const when = +r.minutes ? (range + " " + esc(r.start || "") + "–" + esc(r.end || "")) : range;
+    return '<div class="row">' +
+      '<div class="dnum"><b>' + pad(d.getDate()) + '</b><span>' + TH_DAY_S[d.getDay()] + '</span></div>' +
+      '<div class="times">' + esc(r.leave_type) + statusTag(r.status) +
+        '<div class="sub">' + when + " · " + esc(r.note) + '</div></div>' +
+      '<div class="hrs">' + (+r.minutes ? (+r.minutes + " น.") : ((+r.days || 0) + " วัน")) + '</div></div>';
+  }).join("");
+}
+
+/* ============ CSV export (BOM for Excel Thai) ============ */
+$("#btnCsv").addEventListener("click", ()=>{
+  const y = repMonth.getFullYear(), m = repMonth.getMonth();
+  let head = [], lines = [], tag = "";
+
+  if(repTab === "work"){
+    tag = "work";
+    const list = data.work.slice().filter(r => r.in || r.out).sort((a,b)=>String(a.date).localeCompare(b.date));
+    if(!list.length) return toast("เดือนนี้ยังไม่มีข้อมูลให้ดาวน์โหลด");
+    head = ["วันที่","วัน","รหัสพนักงาน","ชื่อ","แผนก","เวลาเข้า","เวลาออก","ชั่วโมง","สถานะ","หมายเหตุ"];
+    lines = list.map(r=>{
+      const d = new Date(r.date);
+      const hrs = (r.in && r.out) ? fmtHrs(toMin(r.out) - toMin(r.in)) : "";
+      const late = r.in && toMin(r.in) > toMin(CONFIG.WORK_START) + CONFIG.GRACE_MIN ? "สาย" : "";
+      return [r.date, TH_DAY[d.getDay()], me.id, me.name, me.dept, r.in || "", r.out || "", hrs, late,
+              [r.note_in, r.note_out].filter(Boolean).join(" | ")];
+    });
+  }
+  if(repTab === "ot"){
+    tag = "ot";
+    const list = data.ot.slice().sort((a,b)=>String(a.date).localeCompare(b.date));
+    if(!list.length) return toast("เดือนนี้ยังไม่มีคำขอ OT");
+    head = ["วันที่","รหัสพนักงาน","ชื่อ","แผนก","ประเภท","เวลาเริ่ม","เวลาสิ้นสุด","นาที","คิดเป็น","สถานะ","เหตุผล"];
+    lines = list.map(r => [r.date, me.id, me.name, me.dept, r.ot_type, r.start, r.end, otMins(r), fmtHM(otMins(r)), r.status || "", r.note]);
+  }
+  if(repTab === "leave"){
+    tag = "leave";
+    const list = data.leave.slice().sort((a,b)=>String(a.date).localeCompare(b.date));
+    if(!list.length) return toast("เดือนนี้ยังไม่มีใบลา");
+    head = ["ลาตั้งแต่","ถึงวันที่","รหัสพนักงาน","ชื่อ","แผนก","ประเภทการลา","ช่วงเวลา","เวลาเริ่ม","เวลาสิ้นสุด","จำนวนวัน","นาที","สถานะ","เหตุผล"];
+    lines = list.map(r => [r.date, r.date_to, me.id, me.name, me.dept, r.leave_type, r.span,
+                           r.start || "", r.end || "", r.days || 0, r.minutes || 0, r.status || "", r.note]);
+  }
+
+  const csv = [head].concat(lines)
+    .map(row => row.map(v => '"' + String(v == null ? "" : v).replace(/"/g,'""') + '"').join(","))
+    .join("\r\n");
+  const blob = new Blob(["\uFEFF" + csv], { type:"text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = tag + "_" + me.id + "_" + y + pad(m+1) + ".csv";
+  a.click(); URL.revokeObjectURL(a.href);
+});
+
+/* ============ Forget device ============ */
+$("#btnForget").addEventListener("click", ()=>{
+  $("#sheet").innerHTML =
+    '<h3>เปลี่ยนรหัสพนักงาน</h3>' +
+    '<p>เครื่องนี้จะลืมรหัสเดิม และต้องใส่รหัส 4 หลักใหม่ (รายการที่รอส่งจะยังถูกส่งต่อ)</p>' +
+    '<button class="btn btn-primary" id="ok2">ลืมรหัสในเครื่องนี้</button>' +
+    '<button class="btn btn-ghost" id="cancel2">ยกเลิก</button>';
+  openSheet();
+  $("#cancel2").onclick = closeSheet;
+  $("#ok2").onclick = ()=>{
+    store.del(K.pin); store.del(K.me);
+    me = null; buf = ""; noteDraft = "";
+    data = { month:"", work:[], ot:[], leave:[] };
+    renderDots(); closeSheet();
+    $("#home").classList.remove("on"); $("#report").classList.remove("on"); $("#pin").classList.add("on");
+  };
+});
+
+/* ============ Boot ============ */
+(async function boot(){
+  const saved = store.get(K.pin);
+  if(!saved){ renderDots(); return; }
+  try{
+    const cached = JSON.parse(store.get(K.me) || "null");
+    if(cached){ me = cached; openHome(); }                 // show fast from cache
+    const res = await api("auth", { code: saved });        // then confirm with Lark
+    if(res && res.ok){
+      me = Object.assign({ code: saved }, res.employee);
+      store.set(K.me, JSON.stringify(me));
+      if(!cached) openHome(); else { $("#whoName").textContent = me.name; }
+    }else if(!cached){ store.del(K.pin); renderDots(); }
+  }catch(e){
+    if(!me){ renderDots(); }                               // offline and no cache
+  }
+})();
+</script>
+</body>
+</html>
