@@ -529,7 +529,7 @@ async function checkPin(){
   busy = true; $("#pinMsg").textContent = "กำลังตรวจสอบ…"; $("#pinMsg").style.color = "var(--muted)";
   let res;
   try{ res = await api("auth", { code }); }
-  catch(e){ res = { ok:false, error:"ต่อระบบไม่ได้ ลองใหม่อีกครั้ง" }; }
+  catch(e){ res = { ok:false, error: (e && e.message) ? e.message : "ต่อระบบไม่ได้ ลองใหม่อีกครั้ง" }; }
   busy = false;
   $("#pinMsg").style.color = "";
 
